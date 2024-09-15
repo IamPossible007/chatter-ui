@@ -1,11 +1,13 @@
 import { ApolloClient, HttpLink, InMemoryCache, split } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
+import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { API_URL, WS_URL } from "./urls";
 import excludedRoutes from "./excluded-routes";
 import { onLogout } from "../utils/logout";
 import { createClient } from "graphql-ws";
 import { getMainDefinition } from "@apollo/client/utilities";
+import { getToken } from "../utils/token";
 
 const logoutLink = onError((error) => {
   if (
@@ -19,11 +21,23 @@ const logoutLink = onError((error) => {
   }
 });
 
+const authLink = setContext((_, { headers }) => {
+  return {
+    headers: {
+      ...headers,
+      authorization: getToken(),
+    },
+  };
+});
+
 const httpLink = new HttpLink({ uri: `${API_URL}/graphql` });
 
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: `ws://${WS_URL}/graphql`,
+    url: `${WS_URL}/graphql`,
+    connectionParams: {
+      token: getToken(),
+    },
   })
 );
 
@@ -56,7 +70,7 @@ const client = new ApolloClient({
       },
     },
   }),
-  link: logoutLink.concat(splitLink),
+  link: logoutLink.concat(authLink).concat(splitLink),
 });
 
 function merge(existing: any, incoming: any, { args }: any) {
