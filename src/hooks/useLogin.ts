@@ -19,6 +19,7 @@ const useLogin = () => {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(request),
     });
     if (!res.ok) {
