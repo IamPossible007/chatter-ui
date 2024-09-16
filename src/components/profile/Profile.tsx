@@ -34,7 +34,8 @@ const Profile = () => {
         justifyContent: "center",
       }}
     >
-      <Typography variant="h1">{me?.data?.me.username}</Typography>
+      <Typography variant="h2">{me?.data?.me.username}</Typography>
+      <Typography variant="h2">{me?.data?.me.email}</Typography>
       <Avatar sx={{ width: 256, height: 256 }} src={me.data?.me.imageUrl} />
       <Button
         component="label"
